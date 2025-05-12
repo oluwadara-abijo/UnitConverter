@@ -1,5 +1,7 @@
 package com.dara.unitconverter.ui
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,34 +35,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.graphics.Color.Companion.Gray
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dara.unitconverter.R
-import com.dara.unitconverter.data.Length
-import com.dara.unitconverter.data.Mass
-import com.dara.unitconverter.data.Temperature
+import com.dara.unitconverter.utils.UnitConverter.isValidAmount
 
 @Composable
-fun ConversionScreen(modifier: Modifier) {
+fun ConversionScreen(
+    modifier: Modifier,
+    viewModel: ConversionViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState
+    val context = LocalContext.current
+
     val unitTypes = listOf(
         stringResource(R.string.temperature),
         stringResource(R.string.length),
         stringResource(R.string.mass)
     )
-
-    val (selectedUnitType, setSelectedUnitType) = remember { mutableStateOf("") }
-
-    val unitOptions = when (selectedUnitType) {
-        stringResource(R.string.temperature) -> Temperature.entries.map { it.name }
-        stringResource(R.string.length) -> Length.entries.map { it.name }
-        stringResource(R.string.mass) -> Mass.entries.map { it.name }
-        else -> emptyList()
-    }
-
-    val (initialUnit, setInitialUnit) = remember { mutableStateOf("") }
-    val (targetUnit, setTargetUnit) = remember { mutableStateOf("") }
 
     Column(modifier.padding(vertical = 48.dp, horizontal = 16.dp)) {
         Text(
@@ -76,19 +72,21 @@ fun ConversionScreen(modifier: Modifier) {
         UnitSpinner(
             units = unitTypes,
             onUnitSelected = { selectedUnitType ->
-                setSelectedUnitType(selectedUnitType)
-                setInitialUnit("")
-                setTargetUnit("")
+                viewModel.updateUnitType(selectedUnitType)
             })
         Spacer(modifier = Modifier.height(12.dp))
         UnitsRow(
-            units = unitOptions,
-            onInitialUnitSelected = { setInitialUnit(initialUnit) },
-            onTargetUnitSelected = { setTargetUnit(targetUnit) })
-        ValueFromTextField(unit = initialUnit) { }
+            units = uiState.unitOptions,
+            onInitialUnitSelected = { initialUnit -> viewModel.updateInitialUnit(initialUnit) },
+            onTargetUnitSelected = { targetUnit -> viewModel.updateTargetUnit(targetUnit) })
+        ValueFromTextField(unit = uiState.initialUnit) { initialValue ->
+            viewModel.updateInputValue(
+                initialValue
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
-        ValueToTextField(amount = "", unit = targetUnit)
-        ConvertButton()
+        ValueToTextField(amount = uiState.targetValue, unit = uiState.targetUnit)
+        ConvertButton(uiState, viewModel, context)
     }
 }
 
@@ -205,9 +203,7 @@ private fun ValueFromTextField(
 fun ValueToTextField(amount: String, unit: String) {
     Row(
         modifier = Modifier
-            .background(
-                color = Gray.copy(alpha = 0.2f), shape = RoundedCornerShape(8.dp)
-            )
+            .background(color = Gray.copy(alpha = 0.2f), shape = RoundedCornerShape(8.dp))
             .padding(16.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -219,12 +215,41 @@ fun ValueToTextField(amount: String, unit: String) {
 
 @Composable
 private fun ConvertButton(
+    uiState: ConversionUiState,
+    viewModel: ConversionViewModel,
+    context: Context
 ) {
     Button(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 32.dp),
-        onClick = {},
+        enabled = (uiState.initialUnit.isNotBlank() && uiState.targetUnit.isNotBlank()),
+        onClick = {
+            val (isValid, errorMessage) = isValidAmount(uiState.initialValue)
+            if (isValid) {
+                when (uiState.selectedUnitType) {
+                    context.getString(R.string.temperature) -> viewModel.convertTemperature(
+                        uiState.initialUnit,
+                        uiState.targetUnit,
+                        uiState.initialValue
+                    )
+
+                    context.getString(R.string.length) -> viewModel.convertLength(
+                        uiState.initialUnit,
+                        uiState.targetUnit,
+                        uiState.initialValue
+                    )
+
+                    context.getString(R.string.mass) -> viewModel.convertMass(
+                        uiState.initialUnit,
+                        uiState.targetUnit,
+                        uiState.initialValue
+                    )
+                }
+            } else {
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        },
         shape = RoundedCornerShape(8.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Blue)
