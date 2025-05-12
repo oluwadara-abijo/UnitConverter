@@ -63,26 +63,20 @@ fun ConversionScreen(
             stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineLarge
         )
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.select_unit_type_for_conversion),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(48.dp))
         UnitSpinner(
             units = unitTypes,
             onUnitSelected = { selectedUnitType ->
                 viewModel.updateUnitType(selectedUnitType)
-            })
-        Spacer(modifier = Modifier.height(12.dp))
+            },
+            label = stringResource(R.string.select_unit_type_for_conversion)
+        )
         UnitsRow(
             units = uiState.unitOptions,
             onInitialUnitSelected = { initialUnit -> viewModel.updateInitialUnit(initialUnit) },
             onTargetUnitSelected = { targetUnit -> viewModel.updateTargetUnit(targetUnit) })
         ValueFromTextField(unit = uiState.initialUnit) { initialValue ->
-            viewModel.updateInputValue(
-                initialValue
-            )
+            viewModel.updateInputValue(initialValue)
         }
         Spacer(modifier = Modifier.height(16.dp))
         ValueToTextField(amount = uiState.targetValue, unit = uiState.targetUnit)
@@ -95,44 +89,52 @@ fun ConversionScreen(
 fun UnitSpinner(
     units: List<String>,
     onUnitSelected: (String) -> Unit,
+    label: String
 ) {
     var selectedUnit by remember { mutableStateOf("") }
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenuBox(
-        expanded = isDropdownExpanded,
-        onExpandedChange = { isDropdownExpanded = !isDropdownExpanded }) {
-        OutlinedTextField(
-            modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-                .fillMaxWidth(),
-            value = selectedUnit,
-            onValueChange = { },
-            readOnly = true,
-            singleLine = true,
-            trailingIcon = {
-                if (isDropdownExpanded) Icon(
-                    painterResource(R.drawable.ic_expand_less),
-                    contentDescription = null
-                ) else {
-                    Icon(
-                        painterResource(R.drawable.ic_expand_more),
-                        contentDescription = null
-                    )
-                }
-            }
+    Column {
+        Text(
+            text = label,
+            modifier = Modifier.padding(bottom = 4.dp),
+            style = MaterialTheme.typography.bodyMedium
         )
-        ExposedDropdownMenu(
+        ExposedDropdownMenuBox(
             expanded = isDropdownExpanded,
-            onDismissRequest = { isDropdownExpanded = false }) {
-            units.forEach { unit ->
-                DropdownMenuItem(
-                    text = { Text(unit) },
-                    onClick = {
-                        selectedUnit = unit
-                        isDropdownExpanded = false
-                        onUnitSelected(unit)
-                    })
+            onExpandedChange = { isDropdownExpanded = !isDropdownExpanded }) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                    .fillMaxWidth(),
+                value = selectedUnit,
+                onValueChange = { },
+                readOnly = true,
+                singleLine = true,
+                trailingIcon = {
+                    if (isDropdownExpanded) Icon(
+                        painterResource(R.drawable.ic_expand_less),
+                        contentDescription = null
+                    ) else {
+                        Icon(
+                            painterResource(R.drawable.ic_expand_more),
+                            contentDescription = null
+                        )
+                    }
+                }
+            )
+            ExposedDropdownMenu(
+                expanded = isDropdownExpanded,
+                onDismissRequest = { isDropdownExpanded = false }) {
+                units.forEach { unit ->
+                    DropdownMenuItem(
+                        text = { Text(unit) },
+                        onClick = {
+                            selectedUnit = unit
+                            isDropdownExpanded = false
+                            onUnitSelected(unit)
+                        })
+                }
             }
         }
     }
@@ -155,10 +157,11 @@ fun UnitsRow(
             UnitSpinner(
                 units = units,
                 onUnitSelected = onInitialUnitSelected,
+                label = "From"
             )
         }
         Icon(
-            modifier = Modifier.padding(horizontal = 12.dp),
+            modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 32.dp),
             painter = painterResource(R.drawable.ic_swap),
             contentDescription = null
         )
@@ -166,6 +169,7 @@ fun UnitsRow(
             UnitSpinner(
                 units,
                 onUnitSelected = onTargetUnitSelected,
+                label = "To"
             )
         }
     }
@@ -187,7 +191,7 @@ private fun ValueFromTextField(
         },
         trailingIcon = { Text(unit, color = Gray) },
         singleLine = true,
-        placeholder = { Text("0") },
+        placeholder = { Text("Enter value to convert") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Gray.copy(alpha = 0.2f),
@@ -208,7 +212,11 @@ fun ValueToTextField(amount: String, unit: String) {
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(amount)
+        Text(
+            amount,
+            style = MaterialTheme.typography.headlineSmall,
+            color = Blue
+        )
         Text(unit, color = Gray)
     }
 }
