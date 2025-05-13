@@ -97,7 +97,7 @@ class ConversionViewModel : ViewModel() {
                 "Feet" to "Inches" -> feetToInches(input)
                 "Inches" to "Meters" -> inchesToMeters(input)
                 "Inches" to "Feet" -> inchesToFeet(input)
-                else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
+                else -> throw IllegalArgumentException("Unsupported length conversion: $initialUnit to $targetUnit")
             }
             updateState(targetValue = result.toString())
         }
@@ -120,11 +120,50 @@ class ConversionViewModel : ViewModel() {
                 "Pounds" to "Ounces" -> poundsToOunces(input)
                 "Ounces" to "Kilograms" -> ouncesToKilograms(input)
                 "Ounces" to "Pounds" -> ouncesToPounds(input)
-                else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
+                else -> throw IllegalArgumentException("Unsupported mass conversion: $initialUnit to $targetUnit")
             }
             updateState(targetValue = result.toString())
         }
 
+    }
+
+    /**
+     * Swaps the initial and target units for the current conversion.
+     *
+     * This function updates the UI state by exchanging the values of [initialUnit] and [targetUnit].
+     * After the swap, it triggers a new conversion based on the updated units and the current input value.
+     * The conversion performed depends on the currently selected unit type ([selectedUnitType]).
+     *
+     * - If the selected unit type is "Temperature", [convertTemperature] is called.
+     * - If the selected unit type is "Length", [convertLength] is called.
+     * - If the selected unit type is "Mass", [convertMass] is called.
+     */
+    fun swapConversion() {
+        val newInitialUnit = _uiState.value.targetUnit
+        val newTargetUnit = _uiState.value.initialUnit
+        updateState(
+            initialUnit = newInitialUnit,
+            targetUnit = newTargetUnit
+        )
+        when (_uiState.value.selectedUnitType) {
+            "Temperature" -> convertTemperature(
+                uiState.value.initialUnit,
+                uiState.value.targetUnit,
+                uiState.value.initialValue
+            )
+
+            "Length" -> convertLength(
+                uiState.value.initialUnit,
+                uiState.value.targetUnit,
+                uiState.value.initialValue
+            )
+
+            "Mass" -> convertMass(
+                uiState.value.initialUnit,
+                uiState.value.targetUnit,
+                uiState.value.initialValue
+            )
+        }
     }
 
 

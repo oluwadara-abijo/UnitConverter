@@ -3,6 +3,7 @@ package com.dara.unitconverter.ui
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,6 +67,7 @@ fun ConversionScreen(
         Spacer(modifier = Modifier.height(48.dp))
         UnitSpinner(
             units = unitTypes,
+            selectedUnit = uiState.selectedUnitType,
             onUnitSelected = { selectedUnitType ->
                 viewModel.updateUnitType(selectedUnitType)
             },
@@ -73,8 +75,12 @@ fun ConversionScreen(
         )
         UnitsRow(
             units = uiState.unitOptions,
+            initialUnit = uiState.initialUnit,
+            targetUnit = uiState.targetUnit,
             onInitialUnitSelected = { initialUnit -> viewModel.updateInitialUnit(initialUnit) },
-            onTargetUnitSelected = { targetUnit -> viewModel.updateTargetUnit(targetUnit) })
+            onTargetUnitSelected = { targetUnit -> viewModel.updateTargetUnit(targetUnit) },
+            onUnitsSwapped = { viewModel.swapConversion() }
+        )
         ValueFromTextField(unit = uiState.initialUnit) { initialValue ->
             viewModel.updateInputValue(initialValue)
         }
@@ -88,10 +94,10 @@ fun ConversionScreen(
 @Composable
 fun UnitSpinner(
     units: List<String>,
+    selectedUnit: String,
     onUnitSelected: (String) -> Unit,
     label: String
 ) {
-    var selectedUnit by remember { mutableStateOf("") }
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
     Column {
@@ -130,7 +136,6 @@ fun UnitSpinner(
                     DropdownMenuItem(
                         text = { Text(unit) },
                         onClick = {
-                            selectedUnit = unit
                             isDropdownExpanded = false
                             onUnitSelected(unit)
                         })
@@ -143,8 +148,11 @@ fun UnitSpinner(
 @Composable
 fun UnitsRow(
     units: List<String>,
+    initialUnit: String,
+    targetUnit: String,
     onInitialUnitSelected: (String) -> Unit,
-    onTargetUnitSelected: (String) -> Unit
+    onTargetUnitSelected: (String) -> Unit,
+    onUnitsSwapped: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -156,18 +164,25 @@ fun UnitsRow(
         Box(modifier = Modifier.weight(1f)) {
             UnitSpinner(
                 units = units,
+                selectedUnit = initialUnit,
                 onUnitSelected = onInitialUnitSelected,
                 label = "From"
             )
         }
         Icon(
-            modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 32.dp),
+            modifier = Modifier
+                .padding(start = 12.dp, end = 12.dp, top = 32.dp)
+                .clickable(
+                    enabled = initialUnit.isNotEmpty() && targetUnit.isNotEmpty(),
+                    onClick = onUnitsSwapped
+                ),
             painter = painterResource(R.drawable.ic_swap),
             contentDescription = null
         )
         Box(modifier = Modifier.weight(1f)) {
             UnitSpinner(
-                units,
+                units = units,
+                selectedUnit = targetUnit,
                 onUnitSelected = onTargetUnitSelected,
                 label = "To"
             )
