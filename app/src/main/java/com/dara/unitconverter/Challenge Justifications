@@ -1,0 +1,7 @@
+If I had more time, I would have implemented the two-way conversion by updating the
+state values when the swap icon is clicked, and then automatically performing the
+conversion using the same input. I eventually implemented it in a new branch
+named two-way-conversion.
+
+I used AI for a couple of things - mostly to document my functions. I also used it to
+generate the conversion functions for temperature, length and mass to save time.
