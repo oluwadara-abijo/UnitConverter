@@ -6,6 +6,9 @@ package com.dara.unitconverter.data
  * This enum class provides constants for the three mass unit options: Meters, Feet, and Inches.
  */
 
-enum class Length {
-    Meters, Feet, Inches
+enum class LengthUnit(val displayName: String) {
+    METERS("Meters"),
+    FEET("Feet"),
+    INCHES("Kelvin");
+
 }

@@ -42,6 +42,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dara.unitconverter.R
+import com.dara.unitconverter.data.UnitType.LENGTH
+import com.dara.unitconverter.data.UnitType.MASS
+import com.dara.unitconverter.data.UnitType.TEMPERATURE
 import com.dara.unitconverter.utils.UnitConverter.isValidAmount
 
 @Composable
@@ -53,9 +56,9 @@ fun ConversionScreen(
     val context = LocalContext.current
 
     val unitTypes = listOf(
-        stringResource(R.string.temperature),
-        stringResource(R.string.length),
-        stringResource(R.string.mass)
+        TEMPERATURE.displayName,
+        MASS.displayName,
+        LENGTH.displayName
     )
 
     Column(modifier.padding(vertical = 48.dp, horizontal = 16.dp)) {
@@ -236,19 +239,19 @@ private fun ConvertButton(
             val (isValid, errorMessage) = isValidAmount(uiState.initialValue)
             if (isValid) {
                 when (uiState.selectedUnitType) {
-                    context.getString(R.string.temperature) -> viewModel.convertTemperature(
+                    TEMPERATURE.displayName -> viewModel.convertTemperature(
                         uiState.initialUnit,
                         uiState.targetUnit,
                         uiState.initialValue
                     )
 
-                    context.getString(R.string.length) -> viewModel.convertLength(
+                    LENGTH.displayName -> viewModel.convertLength(
                         uiState.initialUnit,
                         uiState.targetUnit,
                         uiState.initialValue
                     )
 
-                    context.getString(R.string.mass) -> viewModel.convertMass(
+                    MASS.displayName -> viewModel.convertMass(
                         uiState.initialUnit,
                         uiState.targetUnit,
                         uiState.initialValue

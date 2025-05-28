@@ -3,9 +3,21 @@ package com.dara.unitconverter.ui
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.dara.unitconverter.data.Length
-import com.dara.unitconverter.data.Mass
-import com.dara.unitconverter.data.Temperature
+import com.dara.unitconverter.data.LengthUnit
+import com.dara.unitconverter.data.LengthUnit.FEET
+import com.dara.unitconverter.data.LengthUnit.INCHES
+import com.dara.unitconverter.data.LengthUnit.METERS
+import com.dara.unitconverter.data.MassUnit
+import com.dara.unitconverter.data.MassUnit.KILOGRAMS
+import com.dara.unitconverter.data.MassUnit.OUNCES
+import com.dara.unitconverter.data.MassUnit.POUNDS
+import com.dara.unitconverter.data.TemperatureUnit
+import com.dara.unitconverter.data.TemperatureUnit.CELSIUS
+import com.dara.unitconverter.data.TemperatureUnit.FAHRENHEIT
+import com.dara.unitconverter.data.TemperatureUnit.KELVIN
+import com.dara.unitconverter.data.UnitType.LENGTH
+import com.dara.unitconverter.data.UnitType.MASS
+import com.dara.unitconverter.data.UnitType.TEMPERATURE
 import com.dara.unitconverter.utils.UnitConverter.Length.feetToInches
 import com.dara.unitconverter.utils.UnitConverter.Length.feetToMeters
 import com.dara.unitconverter.utils.UnitConverter.Length.inchesToFeet
@@ -32,9 +44,9 @@ class ConversionViewModel : ViewModel() {
 
     fun updateUnitType(type: String) {
         val options = when (type) {
-            "Temperature" -> Temperature.entries.map { it.name }
-            "Length" -> Length.entries.map { it.name }
-            "Mass" -> Mass.entries.map { it.name }
+            TEMPERATURE.displayName -> TemperatureUnit.entries.map { it.displayName }
+            LENGTH.displayName -> LengthUnit.entries.map { it.displayName }
+            MASS.displayName -> MassUnit.entries.map { it.displayName }
             else -> emptyList()
         }
         updateState(
@@ -65,19 +77,19 @@ class ConversionViewModel : ViewModel() {
 
         if (initialUnit == targetUnit) {
             updateState(targetValue = input.toString())
-        } else {
-            val result = when (initialUnit to targetUnit) {
-                "Celsius" to "Fahrenheit" -> celsiusToFahrenheit(input)
-                "Celsius" to "Kelvin" -> celsiusToKelvin(input)
-                "Fahrenheit" to "Celsius" -> fahrenheitToCelsius(input)
-                "Fahrenheit" to "Kelvin" -> fahrenheitToKelvin(input)
-                "Kelvin" to "Celsius" -> kelvinToCelsius(input)
-                "Kelvin" to "Fahrenheit" -> kelvinToFahrenheit(input)
-                else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
-            }
-            updateState(targetValue = result.toString())
+            return
         }
 
+        val result = when (initialUnit to targetUnit) {
+            CELSIUS.displayName to FAHRENHEIT.displayName -> celsiusToFahrenheit(input)
+            CELSIUS.displayName to KELVIN.displayName -> celsiusToKelvin(input)
+            FAHRENHEIT.displayName to CELSIUS.displayName -> fahrenheitToCelsius(input)
+            FAHRENHEIT.displayName to KELVIN.displayName -> fahrenheitToKelvin(input)
+            KELVIN.displayName to CELSIUS.displayName -> kelvinToCelsius(input)
+            KELVIN.displayName to FAHRENHEIT.displayName -> kelvinToFahrenheit(input)
+            else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
+        }
+        updateState(targetValue = result.toString())
 
     }
 
@@ -91,12 +103,12 @@ class ConversionViewModel : ViewModel() {
             updateState(targetValue = input.toString())
         } else {
             val result = when (initialUnit to targetUnit) {
-                "Meters" to "Feet" -> metersToFeet(input)
-                "Meters" to "Inches" -> metersToInches(input)
-                "Feet" to "Meters" -> feetToMeters(input)
-                "Feet" to "Inches" -> feetToInches(input)
-                "Inches" to "Meters" -> inchesToMeters(input)
-                "Inches" to "Feet" -> inchesToFeet(input)
+                METERS.displayName to FEET.displayName -> metersToFeet(input)
+                METERS.displayName to INCHES.displayName -> metersToInches(input)
+                FEET.displayName to METERS.displayName -> feetToMeters(input)
+                FEET.displayName to INCHES.displayName -> feetToInches(input)
+                INCHES.displayName to METERS.displayName -> inchesToMeters(input)
+                INCHES.displayName to FEET.displayName -> inchesToFeet(input)
                 else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
             }
             updateState(targetValue = result.toString())
@@ -114,19 +126,18 @@ class ConversionViewModel : ViewModel() {
             updateState(targetValue = input.toString())
         } else {
             val result = when (initialUnit to targetUnit) {
-                "Kilograms" to "Pounds" -> kilogramsToPounds(input)
-                "Kilograms" to "Ounces" -> kilogramsToOunces(input)
-                "Pounds" to "Kilograms" -> poundsToKilograms(input)
-                "Pounds" to "Ounces" -> poundsToOunces(input)
-                "Ounces" to "Kilograms" -> ouncesToKilograms(input)
-                "Ounces" to "Pounds" -> ouncesToPounds(input)
+                KILOGRAMS.displayName to POUNDS.displayName -> kilogramsToPounds(input)
+                KILOGRAMS.displayName to OUNCES.displayName -> kilogramsToOunces(input)
+                POUNDS.displayName to KILOGRAMS.displayName -> poundsToKilograms(input)
+                POUNDS.displayName to OUNCES.displayName -> poundsToOunces(input)
+                OUNCES.displayName to KILOGRAMS.displayName -> ouncesToKilograms(input)
+                OUNCES.displayName to POUNDS.displayName -> ouncesToPounds(input)
                 else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
             }
             updateState(targetValue = result.toString())
         }
 
     }
-
 
     // Updates the current state of the UI given the necessary values
     private fun updateState(

@@ -5,6 +5,9 @@ package com.dara.unitconverter.data
  *
  * This enum class provides constants for the three mass unit options: Kilograms, Pounds, and Ounces.
  */
-enum class Mass {
-    Kilograms, Pounds, Ounces
+enum class MassUnit(val displayName: String) {
+    KILOGRAMS("Kilograms"),
+    POUNDS("Pounds"),
+    OUNCES("Ounces");
+
 }
