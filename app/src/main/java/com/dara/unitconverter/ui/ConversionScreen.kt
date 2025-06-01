@@ -69,11 +69,13 @@ fun ConversionScreen(
         Spacer(modifier = Modifier.height(48.dp))
         UnitSpinner(
             units = unitTypes,
+            selectedUnit = uiState.selectedUnitType,
             onUnitSelected = { selectedUnitType -> viewModel.updateUnitType(selectedUnitType) },
             label = stringResource(R.string.select_unit_type_for_conversion)
         )
         UnitsRow(
             units = uiState.unitOptions,
+            uiState = uiState,
             onInitialUnitSelected = { initialUnit -> viewModel.updateInitialUnit(initialUnit) },
             onTargetUnitSelected = { targetUnit -> viewModel.updateTargetUnit(targetUnit) })
         ValueFromTextField(unit = uiState.initialUnit) { initialValue ->
@@ -89,10 +91,10 @@ fun ConversionScreen(
 @Composable
 fun UnitSpinner(
     units: List<String>,
+    selectedUnit: String,
     onUnitSelected: (String) -> Unit,
     label: String
 ) {
-    var selectedUnit by remember { mutableStateOf("") }
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
     Column {
@@ -131,7 +133,7 @@ fun UnitSpinner(
                     DropdownMenuItem(
                         text = { Text(unit) },
                         onClick = {
-                            selectedUnit = unit
+//                            selectedUnit = unit
                             isDropdownExpanded = false
                             onUnitSelected(unit)
                         })
@@ -144,6 +146,7 @@ fun UnitSpinner(
 @Composable
 fun UnitsRow(
     units: List<String>,
+    uiState: ConversionUiState,
     onInitialUnitSelected: (String) -> Unit,
     onTargetUnitSelected: (String) -> Unit
 ) {
@@ -157,6 +160,7 @@ fun UnitsRow(
         Box(modifier = Modifier.weight(1f)) {
             UnitSpinner(
                 units = units,
+                selectedUnit = uiState.initialUnit,
                 onUnitSelected = onInitialUnitSelected,
                 label = "From"
             )
@@ -169,6 +173,7 @@ fun UnitsRow(
         Box(modifier = Modifier.weight(1f)) {
             UnitSpinner(
                 units,
+                selectedUnit = uiState.targetUnit,
                 onUnitSelected = onTargetUnitSelected,
                 label = "To"
             )
