@@ -3,6 +3,7 @@ package com.dara.unitconverter.ui
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,9 +76,12 @@ fun ConversionScreen(
         )
         UnitsRow(
             units = uiState.unitOptions,
-            uiState = uiState,
+            initialUnit = uiState.initialUnit,
+            targetUnit = uiState.targetUnit,
             onInitialUnitSelected = { initialUnit -> viewModel.updateInitialUnit(initialUnit) },
-            onTargetUnitSelected = { targetUnit -> viewModel.updateTargetUnit(targetUnit) })
+            onTargetUnitSelected = { targetUnit -> viewModel.updateTargetUnit(targetUnit) },
+            onUnitsSwapped = { viewModel.swapConversion() }
+        )
         ValueFromTextField(unit = uiState.initialUnit) { initialValue ->
             viewModel.updateInputValue(initialValue)
         }
@@ -133,7 +137,6 @@ fun UnitSpinner(
                     DropdownMenuItem(
                         text = { Text(unit) },
                         onClick = {
-//                            selectedUnit = unit
                             isDropdownExpanded = false
                             onUnitSelected(unit)
                         })
@@ -146,9 +149,12 @@ fun UnitSpinner(
 @Composable
 fun UnitsRow(
     units: List<String>,
-    uiState: ConversionUiState,
+//    uiState: ConversionUiState,
+    initialUnit: String,
+    targetUnit: String,
     onInitialUnitSelected: (String) -> Unit,
-    onTargetUnitSelected: (String) -> Unit
+    onTargetUnitSelected: (String) -> Unit,
+    onUnitsSwapped: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -160,20 +166,26 @@ fun UnitsRow(
         Box(modifier = Modifier.weight(1f)) {
             UnitSpinner(
                 units = units,
-                selectedUnit = uiState.initialUnit,
+//                selectedUnit = uiState.initialUnit,
+                selectedUnit = initialUnit,
                 onUnitSelected = onInitialUnitSelected,
                 label = "From"
             )
         }
         Icon(
-            modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 32.dp),
+            modifier = Modifier
+                .padding(start = 12.dp, end = 12.dp, top = 32.dp)
+                .clickable(
+                    enabled = initialUnit.isNotEmpty() && targetUnit.isNotEmpty(),
+                    onClick = onUnitsSwapped
+                ),
             painter = painterResource(R.drawable.ic_swap),
             contentDescription = null
         )
         Box(modifier = Modifier.weight(1f)) {
             UnitSpinner(
-                units,
-                selectedUnit = uiState.targetUnit,
+                units = units,
+                selectedUnit = targetUnit,
                 onUnitSelected = onTargetUnitSelected,
                 label = "To"
             )

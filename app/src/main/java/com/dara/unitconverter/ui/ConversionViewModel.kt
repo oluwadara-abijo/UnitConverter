@@ -103,12 +103,50 @@ class ConversionViewModel : ViewModel() {
         val initialUnit = MassUnit.fromDisplayName(initialUnitString)
         val targetUnit = MassUnit.fromDisplayName(targetUnitString)
 
-
         val valueInCelsius = initialUnit?.toKilograms(input)
         val result = targetUnit?.fromKilograms(valueInCelsius)
 
         updateState(targetValue = result.toString())
 
+    }
+
+    /**
+     * Swaps the initial and target units for the current conversion.
+     *
+     * This function updates the UI state by exchanging the values of initialUnit and targetUnit.
+     * After the swap, it triggers a new conversion based on the updated units and the current input value.
+     * The conversion performed depends on the currently selected unit type selectedUnitType.
+     *
+     * - If the selected unit type is "Temperature", [convertTemperature] is called.
+     * - If the selected unit type is "Length", [convertLength] is called.
+     * - If the selected unit type is "Mass", [convertMass] is called.
+     */
+    fun swapConversion() {
+        val newInitialUnit = _uiState.value.targetUnit
+        val newTargetUnit = _uiState.value.initialUnit
+        updateState(
+            initialUnit = newInitialUnit,
+            targetUnit = newTargetUnit
+        )
+        when (_uiState.value.selectedUnitType) {
+            "Temperature" -> convertTemperature(
+                uiState.value.initialUnit,
+                uiState.value.targetUnit,
+                uiState.value.initialValue
+            )
+
+            "Length" -> convertLength(
+                uiState.value.initialUnit,
+                uiState.value.targetUnit,
+                uiState.value.initialValue
+            )
+
+            "Mass" -> convertMass(
+                uiState.value.initialUnit,
+                uiState.value.targetUnit,
+                uiState.value.initialValue
+            )
+        }
     }
 
     // Updates the current state of the UI given the necessary values
