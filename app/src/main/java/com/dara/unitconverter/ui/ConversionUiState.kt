@@ -5,6 +5,6 @@ data class ConversionUiState(
     val unitOptions: List<String> = emptyList(),
     val initialUnit: String = "",
     val targetUnit: String = "",
-    val initialValue: String = "0",
+    val initialValue: String = "",
     val targetValue: String = "",
 )

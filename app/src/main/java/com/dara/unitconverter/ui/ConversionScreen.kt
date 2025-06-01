@@ -45,7 +45,7 @@ import com.dara.unitconverter.R
 import com.dara.unitconverter.data.UnitType.LENGTH
 import com.dara.unitconverter.data.UnitType.MASS
 import com.dara.unitconverter.data.UnitType.TEMPERATURE
-import com.dara.unitconverter.utils.UnitConverter.isValidAmount
+import com.dara.unitconverter.utils.isValidAmount
 
 @Composable
 fun ConversionScreen(
@@ -69,9 +69,7 @@ fun ConversionScreen(
         Spacer(modifier = Modifier.height(48.dp))
         UnitSpinner(
             units = unitTypes,
-            onUnitSelected = { selectedUnitType ->
-                viewModel.updateUnitType(selectedUnitType)
-            },
+            onUnitSelected = { selectedUnitType -> viewModel.updateUnitType(selectedUnitType) },
             label = stringResource(R.string.select_unit_type_for_conversion)
         )
         UnitsRow(
@@ -185,14 +183,19 @@ private fun ValueFromTextField(
 ) {
     var amount by remember { mutableStateOf("") }
     OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         value = amount,
         onValueChange = {
             amount = it
             onValueChanged(it)
         },
-        trailingIcon = { Text(unit, color = Gray) },
+        trailingIcon = {
+            Text(
+                unit,
+                color = Gray,
+                modifier = Modifier.padding(end = 16.dp)
+            )
+        },
         singleLine = true,
         placeholder = { Text("Enter value to convert") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -234,7 +237,8 @@ private fun ConvertButton(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 32.dp),
-        enabled = (uiState.initialUnit.isNotBlank() && uiState.targetUnit.isNotBlank()),
+        enabled = (uiState.initialUnit.isNotBlank() && uiState.targetUnit.isNotBlank()
+                && uiState.initialValue.isNotBlank()),
         onClick = {
             val (isValid, errorMessage) = isValidAmount(uiState.initialValue)
             if (isValid) {

@@ -4,38 +4,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.dara.unitconverter.data.LengthUnit
-import com.dara.unitconverter.data.LengthUnit.FEET
-import com.dara.unitconverter.data.LengthUnit.INCHES
-import com.dara.unitconverter.data.LengthUnit.METERS
 import com.dara.unitconverter.data.MassUnit
-import com.dara.unitconverter.data.MassUnit.KILOGRAMS
-import com.dara.unitconverter.data.MassUnit.OUNCES
-import com.dara.unitconverter.data.MassUnit.POUNDS
 import com.dara.unitconverter.data.TemperatureUnit
-import com.dara.unitconverter.data.TemperatureUnit.CELSIUS
-import com.dara.unitconverter.data.TemperatureUnit.FAHRENHEIT
-import com.dara.unitconverter.data.TemperatureUnit.KELVIN
 import com.dara.unitconverter.data.UnitType.LENGTH
 import com.dara.unitconverter.data.UnitType.MASS
 import com.dara.unitconverter.data.UnitType.TEMPERATURE
-import com.dara.unitconverter.utils.UnitConverter.Length.feetToInches
-import com.dara.unitconverter.utils.UnitConverter.Length.feetToMeters
-import com.dara.unitconverter.utils.UnitConverter.Length.inchesToFeet
-import com.dara.unitconverter.utils.UnitConverter.Length.inchesToMeters
-import com.dara.unitconverter.utils.UnitConverter.Length.metersToFeet
-import com.dara.unitconverter.utils.UnitConverter.Length.metersToInches
-import com.dara.unitconverter.utils.UnitConverter.Mass.kilogramsToOunces
-import com.dara.unitconverter.utils.UnitConverter.Mass.kilogramsToPounds
-import com.dara.unitconverter.utils.UnitConverter.Mass.ouncesToKilograms
-import com.dara.unitconverter.utils.UnitConverter.Mass.ouncesToPounds
-import com.dara.unitconverter.utils.UnitConverter.Mass.poundsToKilograms
-import com.dara.unitconverter.utils.UnitConverter.Mass.poundsToOunces
-import com.dara.unitconverter.utils.UnitConverter.Temperature.celsiusToFahrenheit
-import com.dara.unitconverter.utils.UnitConverter.Temperature.celsiusToKelvin
-import com.dara.unitconverter.utils.UnitConverter.Temperature.fahrenheitToCelsius
-import com.dara.unitconverter.utils.UnitConverter.Temperature.fahrenheitToKelvin
-import com.dara.unitconverter.utils.UnitConverter.Temperature.kelvinToCelsius
-import com.dara.unitconverter.utils.UnitConverter.Temperature.kelvinToFahrenheit
 
 class ConversionViewModel : ViewModel() {
 
@@ -70,72 +43,71 @@ class ConversionViewModel : ViewModel() {
     }
 
     fun convertTemperature(
-        initialUnit: String, targetUnit: String, value: String
+        initialUnitString: String,
+        targetUnitString: String,
+        temperatureValue: String
     ) {
-        val input =
-            value.toDoubleOrNull() ?: throw IllegalArgumentException("Invalid numeric input")
+        val input = temperatureValue.toDouble()
 
-        if (initialUnit == targetUnit) {
+        if (initialUnitString == targetUnitString) {
             updateState(targetValue = input.toString())
             return
         }
 
-        val result = when (initialUnit to targetUnit) {
-            CELSIUS.displayName to FAHRENHEIT.displayName -> celsiusToFahrenheit(input)
-            CELSIUS.displayName to KELVIN.displayName -> celsiusToKelvin(input)
-            FAHRENHEIT.displayName to CELSIUS.displayName -> fahrenheitToCelsius(input)
-            FAHRENHEIT.displayName to KELVIN.displayName -> fahrenheitToKelvin(input)
-            KELVIN.displayName to CELSIUS.displayName -> kelvinToCelsius(input)
-            KELVIN.displayName to FAHRENHEIT.displayName -> kelvinToFahrenheit(input)
-            else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
-        }
+        val initialUnit = TemperatureUnit.fromDisplayName(initialUnitString)
+        val targetUnit = TemperatureUnit.fromDisplayName(targetUnitString)
+
+
+        val valueInCelsius = initialUnit?.toCelsius(input)
+        val result = targetUnit?.fromCelsius(valueInCelsius)
+
         updateState(targetValue = result.toString())
 
     }
 
     fun convertLength(
-        initialUnit: String, targetUnit: String, value: String
+        initialUnitString: String,
+        targetUnitString: String,
+        lengthValue: String
     ) {
-        val input =
-            value.toDoubleOrNull() ?: throw IllegalArgumentException("Invalid numeric input")
+        val input = lengthValue.toDouble()
 
-        if (initialUnit == targetUnit) {
+        if (initialUnitString == targetUnitString) {
             updateState(targetValue = input.toString())
-        } else {
-            val result = when (initialUnit to targetUnit) {
-                METERS.displayName to FEET.displayName -> metersToFeet(input)
-                METERS.displayName to INCHES.displayName -> metersToInches(input)
-                FEET.displayName to METERS.displayName -> feetToMeters(input)
-                FEET.displayName to INCHES.displayName -> feetToInches(input)
-                INCHES.displayName to METERS.displayName -> inchesToMeters(input)
-                INCHES.displayName to FEET.displayName -> inchesToFeet(input)
-                else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
-            }
-            updateState(targetValue = result.toString())
+            return
         }
+
+        val initialUnit = LengthUnit.fromDisplayName(initialUnitString)
+        val targetUnit = LengthUnit.fromDisplayName(targetUnitString)
+
+
+        val valueInCelsius = initialUnit?.toMeters(input)
+        val result = targetUnit?.fromMeters(valueInCelsius)
+
+        updateState(targetValue = result.toString())
 
     }
 
     fun convertMass(
-        initialUnit: String, targetUnit: String, value: String
+        initialUnitString: String,
+        targetUnitString: String,
+        massValue: String
     ) {
-        val input =
-            value.toDoubleOrNull() ?: throw IllegalArgumentException("Invalid numeric input")
+        val input = massValue.toDouble()
 
-        if (initialUnit == targetUnit) {
+        if (initialUnitString == targetUnitString) {
             updateState(targetValue = input.toString())
-        } else {
-            val result = when (initialUnit to targetUnit) {
-                KILOGRAMS.displayName to POUNDS.displayName -> kilogramsToPounds(input)
-                KILOGRAMS.displayName to OUNCES.displayName -> kilogramsToOunces(input)
-                POUNDS.displayName to KILOGRAMS.displayName -> poundsToKilograms(input)
-                POUNDS.displayName to OUNCES.displayName -> poundsToOunces(input)
-                OUNCES.displayName to KILOGRAMS.displayName -> ouncesToKilograms(input)
-                OUNCES.displayName to POUNDS.displayName -> ouncesToPounds(input)
-                else -> throw IllegalArgumentException("Unsupported temperature conversion: $initialUnit to $targetUnit")
-            }
-            updateState(targetValue = result.toString())
+            return
         }
+
+        val initialUnit = MassUnit.fromDisplayName(initialUnitString)
+        val targetUnit = MassUnit.fromDisplayName(targetUnitString)
+
+
+        val valueInCelsius = initialUnit?.toKilograms(input)
+        val result = targetUnit?.fromKilograms(valueInCelsius)
+
+        updateState(targetValue = result.toString())
 
     }
 
